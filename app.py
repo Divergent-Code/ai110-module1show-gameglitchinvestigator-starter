@@ -184,8 +184,6 @@ if submit:
                 f"Final score: {st.session_state.score}"
             )
         else:
-            if show_hint:
-                st.warning(message)
             if st.session_state.attempts >= attempt_limit:
                 st.session_state.status = "lost"
                 st.error(
@@ -194,6 +192,8 @@ if submit:
                     f"Score: {st.session_state.score}"
                 )
 
+if show_hint and st.session_state.hint:
+    st.warning(st.session_state.hint)
 
 st.divider()
 st.caption("Built by an AI that claims this code is production-ready.")
