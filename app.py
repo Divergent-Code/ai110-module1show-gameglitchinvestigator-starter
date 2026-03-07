@@ -50,9 +50,6 @@ def update_score(current_score: int, outcome: str, attempt_number: int):
             points = 10
         return current_score + points
 
-    if outcome in ("Too High", "Too Low"):
-        return current_score - 5
-
     return current_score
 
 st.set_page_config(page_title="Glitchy Guesser", page_icon="🎮")
