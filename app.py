@@ -1,3 +1,10 @@
+"""
+app.py
+
+This is the main Streamlit application script for the Game Glitch Investigator.
+It handles the Web UI, manages user sessions via `st.session_state` (surviving reruns),
+and wires up the visual inputs/outputs to the core business logic from `logic_utils.py`.
+"""
 import random
 import streamlit as st
 from logic_utils import get_range_for_difficulty, parse_guess, check_guess, update_score
@@ -7,14 +14,18 @@ st.set_page_config(page_title="Glitchy Guesser", page_icon="🎮")
 st.title("🎮 Game Glitch Investigator")
 st.caption("An AI-generated guessing game. Something is off.")
 
+# ---------------------------------------------------------
+# Sidebar Configuration: Difficulty Settings
+# ---------------------------------------------------------
 st.sidebar.header("Settings")
 
 difficulty = st.sidebar.selectbox(
     "Difficulty",
     ["Easy", "Normal", "Hard", "I'm Feeling Lucky"],
-    index=0,
+    index=0,  # Defaults to "Easy" on first load
 )
 
+# Map human-readable difficulty levels to raw attempt counts
 attempt_limit_map = {
     "Easy": 15,
     "Normal": 10,
@@ -23,11 +34,20 @@ attempt_limit_map = {
 }
 attempt_limit = attempt_limit_map[difficulty]
 
+# Fetch the random number generation range based on current difficulty
 low, high = get_range_for_difficulty(difficulty)
 
 st.sidebar.caption(f"Range: {low} to {high}")
 st.sidebar.caption(f"Attempts allowed: {attempt_limit}")
 
+# ---------------------------------------------------------
+# Application State Management
+# ---------------------------------------------------------
+# Streamlit relies on "rerunning" the entire script every time a user interacts
+# with a widget (like clicking a button or pressing enter in a text box).
+# `st.session_state` allows variables to persist across these constant reruns.
+
+# Reset the entire game state immediately if the user selects a new difficulty
 if st.session_state.get("difficulty") != difficulty:
     st.session_state.difficulty = difficulty
     st.session_state.secret = random.randint(low, high)
@@ -37,6 +57,8 @@ if st.session_state.get("difficulty") != difficulty:
     st.session_state.history = []
     st.session_state.hint = None
 
+
+# Initialize default state variables on the very first page load
 if "secret" not in st.session_state:
     st.session_state.secret = random.randint(low, high)
 
@@ -46,6 +68,7 @@ if "attempts" not in st.session_state:
 if "score" not in st.session_state:
     st.session_state.score = 0
 
+# Status options: "playing", "won", "lost"
 if "status" not in st.session_state:
     st.session_state.status = "playing"
 
@@ -55,6 +78,9 @@ if "history" not in st.session_state:
 if "hint" not in st.session_state:
     st.session_state.hint = None
 
+# ---------------------------------------------------------
+# Main UI Layout
+# ---------------------------------------------------------
 st.subheader("Make a guess")
 
 st.info(
@@ -72,17 +98,22 @@ with st.expander("Developer Debug Info"):
 
 raw_guess = st.text_input(
     "Enter your guess:",
-    key=f"guess_input_{difficulty}"
+    key=f"guess_input_{difficulty}"  # unique key prevents cross-difficulty state collision
 )
 
+# Render buttons in a horizontal row to save space
 col1, col2, col3 = st.columns(3)
 with col1:
     submit = st.button("Submit Guess 🚀")
 with col2:
     new_game = st.button("New Game 🔁")
 with col3:
+    # A standalone toggle for the visual hint (the higher/lower arrow)
     show_hint = st.checkbox("Show hint", value=True)
 
+# ---------------------------------------------------------
+# New Game Logic
+# ---------------------------------------------------------
 if new_game:
     st.session_state.attempts = 0
     st.session_state.secret = random.randint(low, high)
@@ -100,19 +131,27 @@ if st.session_state.status != "playing":
         st.error("Game over. Start a new game to try again.")
     st.stop()
 
+# ---------------------------------------------------------
+# Main Game Loop (Processing a Guess)
+# ---------------------------------------------------------
 if submit:
+    # Step 1: Validate input. Returns (True/False, integer, error/None)
     ok, guess_int, err = parse_guess(raw_guess)
 
     if not ok:
+        # Halt processing sequence: Show error but don't cost the user an attempt
         st.error(err)
     else:
+        # Step 2: Input valid. Deduct an attempt and record the guess.
         st.session_state.attempts += 1
         st.session_state.history.append(guess_int)
 
         secret = st.session_state.secret
 
+        # Step 3: Check for win / higher / lower
         outcome, message = check_guess(guess_int, secret)
 
+        # Store the feedback for the standalone hint UI
         st.session_state.hint = message
 
         st.session_state.score = update_score(
