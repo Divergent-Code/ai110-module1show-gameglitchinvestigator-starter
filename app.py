@@ -164,7 +164,7 @@ if submit:
         secret = st.session_state.secret
         outcome, message = check_guess(guess_int, secret)
 
-        # Calculate temperatures
+        # Challenge 4: Calculate temperatures based on absolute distance (hot/cold tracker feature).
         temp_emoji, temp_label, temp_color = calculate_temperature(guess_int, secret, high - low)
 
         # Build the hint display based on user preferences
@@ -233,7 +233,8 @@ if st.session_state.hint and st.session_state.status != "won":
 if st.session_state.status != "playing" and len(st.session_state.history) > 0:
     st.divider()
     st.subheader("📊 Game Summary")
-    # Tell Streamlit to draw a sleek, interactive dataframe
+    # Challenge 4: Visualizing the session history using a sleek Streamlit dataframe.
+    # This provides a complete log of guesses, temperature hints, and interactions.
     st.dataframe(
         st.session_state.history,
         use_container_width=True,

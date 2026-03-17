@@ -1,38 +1,38 @@
 from logic_utils import check_guess
 
 def test_winning_guess():
-    # If the secret is 50 and guess is 50, it should be a win
+    """Verify that an exact match returns a Win outcome."""
     result = check_guess(50, 50)
     assert result[0] == "Win"
 
 def test_guess_too_high():
-    # If secret is 50 and guess is 60, hint should be "Too High"
+    """Verify that a guess higher than the secret returns a 'Too High' outcome."""
     result = check_guess(60, 50)
     assert result[0] == "Too High"
 
 def test_guess_too_low():
-    # If secret is 50 and guess is 40, hint should be "Too Low"
+    """Verify that a guess lower than the secret returns a 'Too Low' outcome."""
     result = check_guess(40, 50)
     assert result[0] == "Too Low"
 
 from logic_utils import parse_guess
 
 def test_decimal_input():
-    # Test decimal numbers
+    """Ensure that float strings are rejected since the game strictly requires integers."""
     ok, value, err = parse_guess("3.14")
     assert not ok
     assert value is None
     assert err == "Please enter a whole number, not a decimal."
 
 def test_negative_input():
-    # Test negative numbers
+    """Verify that negative integer strings are properly parsed and accepted."""
     ok, value, err = parse_guess("-5")
     assert ok
     assert value == -5
     assert err is None
 
 def test_large_input():
-    # Test extremely large values
+    """Ensure extremely large integers do not overflow or cause parsing errors in Python."""
     ok, value, err = parse_guess("999999999999999999999")
     assert ok
     assert value == 999999999999999999999
@@ -46,12 +46,12 @@ import tempfile
 from logic_utils import load_high_scores, save_high_score
 
 def test_load_high_scores_missing_file():
-    # A non-existent file path should return an empty dict, not crash
+    """Verify that missing files are handled gracefully by returning an empty dict."""
     result = load_high_scores("definitely_does_not_exist.json")
     assert result == {}
 
 def test_save_high_score_adds_entry():
-    # A fresh file should be created and the score stored correctly
+    """Verify that a fresh file is created and the score is stored correctly on the first save."""
     with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as tmp:
         path = tmp.name
     os.unlink(path)  # remove so save_high_score creates it fresh
@@ -63,7 +63,7 @@ def test_save_high_score_adds_entry():
             os.unlink(path)
 
 def test_save_high_score_keeps_top_five():
-    # After submitting 6 scores, only the top 5 should be retained
+    """Ensure that submitting more than 5 scores correctly crops the list to keep only the top 5."""
     with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as tmp:
         path = tmp.name
     os.unlink(path)

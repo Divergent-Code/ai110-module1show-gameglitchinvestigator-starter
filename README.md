@@ -2,72 +2,81 @@
 
 ## 🚨 The Situation
 
-You asked an AI to build a simple "Number Guessing Game" using Streamlit.
-It wrote the code, ran away, and now the game is unplayable. 
+An AI pair programmer generated a simple "Number Guessing Game" using Streamlit. Unfortunately, it handed over a codebase full of glitches: the game was unplayable, the hints actively lied to the player, and the difficulty scaling was completely backwards.
 
-- You can't win.
-- The hints lie to you.
-- The secret number seems to have commitment issues.
+My mission was to step in as the Game Glitch Investigator to diagnose, explain, and responsibly repair the AI-generated code.
 
-## 🛠️ Setup
+## 🛠️ Setup & Execution
 
-1. Install dependencies: `pip install -r requirements.txt`
-2. Run the broken app: `python -m streamlit run app.py`
+To run this game locally:
 
-## 🕵️‍♂️ Your Mission
-
-1. **Play the game.** Open the "Developer Debug Info" tab in the app to see the secret number. Try to win.
-2. **Find the State Bug.** Why does the secret number change every time you click "Submit"? Ask ChatGPT: *"How do I keep a variable from resetting in Streamlit when I click a button?"*
-3. **Fix the Logic.** The hints ("Higher/Lower") are wrong. Fix them.
-4. **Refactor & Test.** - Move the logic into `logic_utils.py`.
-   - Run `pytest` in your terminal.
-   - Keep fixing until all tests pass!
-
-## 📝 Document Your Experience
-
-- [ ] Describe the game's purpose.
-- [ ] Detail which bugs you found.
-- [ ] Explain what fixes you applied.
-
-## 📸 Demo
-
-- [ ] [Insert a screenshot of your fixed, winning game here]
-- [ ] [Insert a screenshot of the pytest command and passing tests here]
-
-## 🚀 Challenge 4: Stretch Features (Agent Mode Feature)
-
-A **Game Session Summary Table** and an **Interactive Hot/Cold Tracker** were added to give the player a more visual, user-friendly experience.
-
-### What it does
-- Choose to enable **🌡️ Hot/Cold Hints** in the sidebar. When enabled, your hints are replaced with temperatures (e.g., 🔥 Boiling, ❄️ Freezing) based on how close you are to the secret number.
-- The color of the hint message dynamically changes based on your temperature!
-- When the game ends, a **📊 Game Summary Table** is displayed showing a timeline of all your guesses, temps, and hints.
-
-### 📸 Demo
-
-- [ ] [Insert a screenshot of your shiny new 📊 Game Summary Table and 🌡️ Hot/Cold hints here!]
+1. Install the required dependencies: `pip install -r requirements.txt`
+2. Launch the Streamlit app: `python -m streamlit run app.py`
+3. Run the automated test suite: `pytest` or `python -m pytest tests/test_game_logic.py`
 
 ---
 
-## 🏆 Challenge 3: High Score Tracker (Agent Mode Feature)
+## 📝 Documenting the Experience
 
-A persistent **High Score leaderboard** was added as part of the Agent Mode challenge.
+### The Game's Purpose
 
-### What it does
-- After winning a game, your score is automatically saved to `high_scores.json`.
-- The sidebar shows a live **Top 5 leaderboard** for whichever difficulty level you are currently playing.
-- If you set the #1 score, the win message displays a **🏆 New high score!** banner.
-- Scores are tracked **per difficulty** (Easy, Normal, Hard, I'm Feeling Lucky).
+This project is an interactive, Streamlit-based web application where a player attempts to guess a randomly generated secret number within a limited number of tries. Players can choose from different difficulty levels (Easy, Normal, Hard, and "I'm Feeling Lucky") and use visual hint systems to help them narrow down the correct answer.
 
-### Files changed
-| File | What changed |
-|---|---|
-| `logic_utils.py` | Added `load_high_scores()` and `save_high_score()` |
-| `app.py` | Imports new helpers, renders sidebar leaderboard, saves score on win |
-| `tests/test_game_logic.py` | Added 3 new tests for high score persistence |
+### Bugs Discovered
 
-### How the Agent contributed
-**Antigravity AI Agent** (Google DeepMind) was used in Agent Mode to:
-1. **Plan the feature** — the agent proposed the architecture, recommending that persistence logic live in `logic_utils.py` so it stays testable independently of the Streamlit UI.
-2. **Write the code** — the agent implemented `load_high_scores`, `save_high_score`, all sidebar UI changes in `app.py`, and the new pytest cases.
-3. **Verify correctness** — the agent ran `python -m pytest` after each change and confirmed all 9 tests pass.
+During the initial "Glitch Hunt", I found several critical logic and state flaws:
+
+- **The Lying Hints:** The directional hints were inverted (e.g., telling players to "📈 Go HIGHER!" when their guess was already too high).
+- **Broken Difficulty:** The "Hard" difficulty actually gave a smaller range of numbers (1–50) than the "Normal" mode (1–100), making it the easiest mode.
+- **Silent Crashes:** Entering decimal numbers or empty strings caused silent truncation or unhandled exceptions.
+- **Double Penalties:** The scoring system unfairly double-penalized players by deducting points for wrong guesses while also reducing the potential win payout.
+- **State Glitches:** A bizarre type-juggling bug caused the secret number to turn into a string on every even attempt, breaking the comparison logic.
+
+### Fixes Applied
+
+To repair the application, I refactored the core game logic out of the UI layer (`app.py`) and into a dedicated `logic_utils.py` file. I corrected the inverted hint directions, fixed the scoring formula so points only scale positively upon a win, implemented robust input validation, and stabilized the Streamlit `st.session_state` so the secret number and attempt counters persist correctly across reruns without consuming attempts on invalid inputs.
+
+---
+
+## 🚀 Completed Challenges
+
+I went beyond the base requirements to deepen my technical reasoning and build out real-world engineering features:
+
+### 🧪 Challenge 1: Advanced Edge-Case Testing
+
+Using AI generation, I created a robust `pytest` suite in `test_game_logic.py` that targets specific edge-case inputs. The game is now verified to handle negative numbers, decimals, and extremely large numbers gracefully without crashing.
+
+### 🏆 Challenge 2: Feature Expansion via Agent Mode
+
+I collaborated with the AI Agent to plan and implement a persistent **High Score leaderboard**.
+
+- Scores are saved automatically to a `high_scores.json` file.
+- The sidebar displays a live Top 5 leaderboard for the currently selected difficulty.
+- The agent designed the architecture to keep the file parsing inside `logic_utils.py` to maintain independent testability.
+
+### 📚 Challenge 3: Professional Documentation and Linting
+
+I used Claude Code to add professional-grade, Google-style docstrings to every function in `logic_utils.py`. I also reviewed the code for PEP 8 style compliance, resolving formatting issues, standardizing dictionaries, and ensuring strong type hints.
+
+### 🌡️ Challenge 4: Enhanced Game UI
+
+I added a structured and user-friendly output to the game to elevate the player experience:
+
+- **Dynamic Hot/Cold Emojis:** Players can toggle a temperature-based hint system that uses color-coded Streamlit alerts (e.g., 🔥 Boiling, ❄️ Cold) based on proximity to the secret.
+- **Game Session Summary Table:** At the end of a session, a sleek `st.dataframe` renders a timeline of all guesses, temperatures, and hints for that round.
+
+---
+
+## 📸 Demo
+
+**1. Passing Automated Tests**
+
+> ![Pytest results showing all testings passing](Challenge_1_Advanced_Edge_Casing.png)
+
+**2. The New Player Experience**
+
+> ![Game settings menu showcasing difficulty settings, scoreboard and hint settings including Hot/Cold mode](Challenge_4_Enhanced_Game_UI_1.png)
+
+> ![Game session showing Hot/Cold hints in action](Challenge_4_Enhanced_Game_UI_2.png)
+
+> ![Game session summary table showcasing all guesses, temperatures, and hints for the round](Challenge_4_Enhanced_Game_UI_3.png)
