@@ -55,7 +55,7 @@ _hs = load_high_scores(HIGH_SCORES_FILE)
 _scores_for_difficulty = _hs.get(difficulty, [])
 if _scores_for_difficulty:
     for _rank, _pts in enumerate(_scores_for_difficulty, start=1):
-        medal = ["🥇", "🥈", "🥉"].get(_rank - 1, f"{_rank}." ) if _rank <= 3 else f"{_rank}."
+        medal = ["🥇", "🥈", "🥉"][_rank - 1] if _rank <= 3 else f"{_rank}."
         st.sidebar.caption(f"{medal} {_pts} pts")
 else:
     st.sidebar.caption("No scores yet — win a game!")
