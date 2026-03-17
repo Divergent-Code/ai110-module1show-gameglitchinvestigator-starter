@@ -82,6 +82,9 @@ with st.expander("Developer Debug Info"):
     st.write("Difficulty:", difficulty)
     st.write("Guess History:", st.session_state.history)
 
+# We use st.form here to group the input and buttons together.
+# This ensures that pressing the "Enter" key inside the text input 
+# correctly triggers the form submission, identical to clicking the button.
 with st.form(key=f"guess_form_{difficulty}"):
     raw_guess = st.text_input(
         "Enter your guess:",

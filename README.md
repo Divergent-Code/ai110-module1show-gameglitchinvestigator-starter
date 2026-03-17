@@ -32,6 +32,7 @@ It wrote the code, ran away, and now the game is unplayable.
 ## 📸 Demo
 
 - [ ] [Insert a screenshot of your fixed, winning game here]
+- [ ] [Insert a screenshot of the pytest command and passing tests here]
 
 ## 🚀 Stretch Features
 
