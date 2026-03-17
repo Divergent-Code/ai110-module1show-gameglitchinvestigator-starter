@@ -68,18 +68,28 @@ def check_guess(guess: int, secret: int):
         return "Too Low", "📈 Go HIGHER!"
 
 
-def update_score(current_score: int, outcome: str, attempt_number: int):
+def update_score(current_score: int, outcome: str, attempt_number: int, difficulty: str = "Normal"):
     """
-    Update score based on outcome and attempt number.
+    Update score based on outcome, attempt number, and difficulty multiplier.
     
-    The scoring system is designed to reward efficiency: the fewer attempts
-    it takes to win, the higher the final score. Incorrect guesses do not
-    actively deduct points to prevent a "double penalty".
+    The scoring system is designed to reward efficiency (fewer attempts).
+    Harder difficulties apply a higher multiplier to the base score.
+    Incorrect guesses do not actively deduct points to prevent a "double penalty".
     """
     if outcome == "Win":
-        # Using max() cleanly enforces the 10-point minimum floor
-        points = max(10, 100 - 10 * attempt_number)
-        return current_score + points
+        # Using max() cleanly enforces the 10-point minimum floor before multipliers
+        base_points = max(10, 100 - 10 * attempt_number)
+        
+        # Apply difficulty multiplier
+        multipliers = {
+            "Easy": 1.0,
+            "Normal": 2.0,
+            "Hard": 5.0,
+            "I'm Feeling Lucky": 10.0
+        }
+        multiplier = multipliers.get(difficulty, 1.0)
+        
+        return current_score + int(base_points * multiplier)
 
     return current_score
 

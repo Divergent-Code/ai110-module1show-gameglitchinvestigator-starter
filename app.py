@@ -72,7 +72,7 @@ else:
 if st.session_state.get("difficulty") != difficulty:
     st.session_state.difficulty = difficulty
     st.session_state.secret = random.randint(low, high)
-    st.session_state.attempts = 0
+    st.session_state.attempts = 1
     st.session_state.score = 0
     st.session_state.status = "playing"
     st.session_state.new_game_started = False
@@ -105,7 +105,7 @@ with st.expander("Developer Debug Info"):
 # We use st.form here to group the input and buttons together.
 # This ensures that pressing the "Enter" key inside the text input 
 # correctly triggers the form submission, identical to clicking the button.
-with st.form(key=f"guess_form_{difficulty}"):
+with st.form(key=f"guess_form_{difficulty}", clear_on_submit=True):
     raw_guess = st.text_input(
         "Enter your guess:",
         key=f"guess_input_{difficulty}"  # unique key prevents cross-difficulty state collision
@@ -125,7 +125,7 @@ with st.form(key=f"guess_form_{difficulty}"):
 # New Game Logic
 # ---------------------------------------------------------
 if new_game:
-    st.session_state.attempts = 0
+    st.session_state.attempts = 1
     st.session_state.secret = random.randint(low, high)
     st.session_state.hint = None
     st.session_state.status = "playing"
@@ -170,6 +170,7 @@ if submit:
             current_score=st.session_state.score,
             outcome=outcome,
             attempt_number=st.session_state.attempts,
+            difficulty=difficulty
         )
 
         if outcome == "Win":
