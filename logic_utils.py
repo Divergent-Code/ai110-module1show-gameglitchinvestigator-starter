@@ -82,3 +82,57 @@ def update_score(current_score: int, outcome: str, attempt_number: int):
         return current_score + points
 
     return current_score
+
+
+# ---------------------------------------------------------------
+# High Score Persistence (Agent-assisted feature)
+#
+# These two functions were designed and implemented with the help
+# of Antigravity AI Agent during the Phase 3 challenge. The agent
+# identified that separating persistence from the UI layer (app.py)
+# makes both halves independently testable.
+# ---------------------------------------------------------------
+
+import json
+import os
+
+def load_high_scores(filepath: str) -> dict:
+    """
+    Load the high scores dictionary from a JSON file.
+
+    Returns a dict shaped like: { "Easy": [90, 70, 50], "Normal": [...], ... }
+    Returns an empty dict if the file doesn't exist or is corrupt,
+    so callers never have to handle file I/O errors themselves.
+    """
+    if not os.path.exists(filepath):
+        return {}
+    try:
+        with open(filepath, "r") as f:
+            return json.load(f)
+    except (json.JSONDecodeError, OSError):
+        # Corrupt or unreadable file — start fresh rather than crash
+        return {}
+
+
+def save_high_score(filepath: str, difficulty: str, score: int) -> list:
+    """
+    Insert 'score' into the leaderboard for 'difficulty', keep the top 5,
+    then persist the updated data back to the JSON file.
+
+    Returns the updated list of scores for that difficulty so callers
+    can display feedback immediately without re-reading the file.
+    """
+    scores = load_high_scores(filepath)
+
+    # Get (or create) the bucket for this difficulty level
+    bucket = scores.get(difficulty, [])
+    bucket.append(score)
+
+    # Sort descending and keep only the top 5 — simple but effective
+    bucket = sorted(bucket, reverse=True)[:5]
+    scores[difficulty] = bucket
+
+    with open(filepath, "w") as f:
+        json.dump(scores, f, indent=2)
+
+    return bucket

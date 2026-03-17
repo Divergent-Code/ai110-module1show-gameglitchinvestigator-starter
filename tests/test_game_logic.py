@@ -37,3 +37,43 @@ def test_large_input():
     assert ok
     assert value == 999999999999999999999
     assert err is None
+
+# ---------------------------------------------------------
+# Tests for High Score persistence (Agent-assisted feature)
+# ---------------------------------------------------------
+import os
+import tempfile
+from logic_utils import load_high_scores, save_high_score
+
+def test_load_high_scores_missing_file():
+    # A non-existent file path should return an empty dict, not crash
+    result = load_high_scores("definitely_does_not_exist.json")
+    assert result == {}
+
+def test_save_high_score_adds_entry():
+    # A fresh file should be created and the score stored correctly
+    with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as tmp:
+        path = tmp.name
+    os.unlink(path)  # remove so save_high_score creates it fresh
+    try:
+        bucket = save_high_score(path, "Easy", 80)
+        assert 80 in bucket
+    finally:
+        if os.path.exists(path):
+            os.unlink(path)
+
+def test_save_high_score_keeps_top_five():
+    # After submitting 6 scores, only the top 5 should be retained
+    with tempfile.NamedTemporaryFile(suffix=".json", delete=False) as tmp:
+        path = tmp.name
+    os.unlink(path)
+    try:
+        for score in [10, 20, 30, 40, 50, 60]:
+            bucket = save_high_score(path, "Normal", score)
+        assert len(bucket) == 5
+        assert 10 not in bucket   # lowest score should be dropped
+        assert 60 in bucket        # highest score should be kept
+    finally:
+        if os.path.exists(path):
+            os.unlink(path)
+

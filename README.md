@@ -37,3 +37,28 @@ It wrote the code, ran away, and now the game is unplayable.
 ## 🚀 Stretch Features
 
 - [ ] [If you choose to complete Challenge 4, insert a screenshot of your Enhanced Game UI here]
+
+---
+
+## 🏆 Challenge 3: High Score Tracker (Agent Mode Feature)
+
+A persistent **High Score leaderboard** was added as part of the Agent Mode challenge.
+
+### What it does
+- After winning a game, your score is automatically saved to `high_scores.json`.
+- The sidebar shows a live **Top 5 leaderboard** for whichever difficulty level you are currently playing.
+- If you set the #1 score, the win message displays a **🏆 New high score!** banner.
+- Scores are tracked **per difficulty** (Easy, Normal, Hard, I'm Feeling Lucky).
+
+### Files changed
+| File | What changed |
+|---|---|
+| `logic_utils.py` | Added `load_high_scores()` and `save_high_score()` |
+| `app.py` | Imports new helpers, renders sidebar leaderboard, saves score on win |
+| `tests/test_game_logic.py` | Added 3 new tests for high score persistence |
+
+### How the Agent contributed
+**Antigravity AI Agent** (Google DeepMind) was used in Agent Mode to:
+1. **Plan the feature** — the agent proposed the architecture, recommending that persistence logic live in `logic_utils.py` so it stays testable independently of the Streamlit UI.
+2. **Write the code** — the agent implemented `load_high_scores`, `save_high_score`, all sidebar UI changes in `app.py`, and the new pytest cases.
+3. **Verify correctness** — the agent ran `python -m pytest` after each change and confirmed all 9 tests pass.

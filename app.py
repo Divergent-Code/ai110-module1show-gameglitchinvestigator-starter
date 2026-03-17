@@ -7,7 +7,10 @@ and wires up the visual inputs/outputs to the core business logic from `logic_ut
 """
 import random
 import streamlit as st
-from logic_utils import get_range_for_difficulty, parse_guess, check_guess, update_score
+from logic_utils import get_range_for_difficulty, parse_guess, check_guess, update_score, load_high_scores, save_high_score
+
+# File path for persisting high scores between sessions (Agent-assisted feature)
+HIGH_SCORES_FILE = "high_scores.json"
 
 st.set_page_config(page_title="Glitchy Guesser", page_icon="🎮")
 
@@ -39,6 +42,23 @@ low, high = get_range_for_difficulty(difficulty)
 
 st.sidebar.caption(f"Range: {low} to {high}")
 st.sidebar.caption(f"Attempts allowed: {attempt_limit}")
+
+# ---------------------------------------------------------
+# Sidebar: High Score Leaderboard (Agent-assisted feature)
+# The agent suggested reading the file on every render so the
+# leaderboard always reflects the latest saved data without
+# requiring a manual refresh or extra session state.
+# ---------------------------------------------------------
+st.sidebar.divider()
+st.sidebar.subheader("🏆 High Scores")
+_hs = load_high_scores(HIGH_SCORES_FILE)
+_scores_for_difficulty = _hs.get(difficulty, [])
+if _scores_for_difficulty:
+    for _rank, _pts in enumerate(_scores_for_difficulty, start=1):
+        medal = ["🥇", "🥈", "🥉"].get(_rank - 1, f"{_rank}." ) if _rank <= 3 else f"{_rank}."
+        st.sidebar.caption(f"{medal} {_pts} pts")
+else:
+    st.sidebar.caption("No scores yet — win a game!")
 
 # ---------------------------------------------------------
 # Application State Management
@@ -155,9 +175,13 @@ if submit:
         if outcome == "Win":
             st.balloons()
             st.session_state.status = "won"
+            # Persist the final score to the leaderboard file
+            updated_scores = save_high_score(HIGH_SCORES_FILE, difficulty, st.session_state.score)
+            is_top = updated_scores[0] == st.session_state.score and updated_scores.count(st.session_state.score) == 1
             st.success(
                 f"You won! The secret was {st.session_state.secret}. "
                 f"Final score: {st.session_state.score}"
+                + (" 🏆 New high score!" if is_top else "")
             )
         else:
             if st.session_state.attempts >= attempt_limit:
